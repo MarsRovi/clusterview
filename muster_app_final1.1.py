@@ -2,7 +2,6 @@
 
 import streamlit as st
 import subprocess
-import importlib.util
 import spacy
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
@@ -12,11 +11,13 @@ import networkx as nx
 import io
 from datetime import datetime
 
-# Sicheres Laden des deutschen spaCy-Modells
+# Sicheres Laden des deutschen spaCy-Modells (mit Download bei Bedarf)
 def load_spacy_model(model_name):
-    if importlib.util.find_spec(model_name) is None:
-        subprocess.run(["python", "-m", "spacy", "download", model_name])
-    return spacy.load(model_name)
+    try:
+        return spacy.load(model_name)
+    except OSError:
+        subprocess.run(["python", "-m", "spacy", "download", model_name], check=True)
+        return spacy.load(model_name)
 
 nlp = load_spacy_model("de_core_news_sm")
 model = SentenceTransformer("distiluse-base-multilingual-cased")
